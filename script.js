@@ -106,6 +106,41 @@ function curry(func) {
 
 const curriedSum = curry(sum);
 
-console.log(curriedSum(1)(2));
+// console.log(curriedSum(1)(2));
 
 // Polyfill of Call Function.
+
+Function.prototype.myCall = function (context, ...args) {
+  if (typeof this !== "function") {
+    throw new Error("this is not a function");
+  }
+  context.fn = this;
+  context.fn(...args);
+};
+
+Function.prototype.myBind = function (context, ...args) {
+  if (typeof this !== "function") {
+    throw new Error("this is not a function");
+  }
+  context.fn = this;
+
+  return function (...newargs) {
+    context.fn(...args, ...newargs);
+  };
+};
+
+const user = {
+  name: "Faiz",
+  age: 20,
+};
+
+function logInfo(habit1, habit2) {
+  console.log(
+    `name = ${this.name}, age = ${this.age},habit = ${
+      habit1 ? habit1 + "," : ""
+    }${habit2 ? habit2 + "," : ""}`
+  );
+}
+
+const logUserInfo = logInfo.bind(user, "coding");
+logUserInfo("gyming");
