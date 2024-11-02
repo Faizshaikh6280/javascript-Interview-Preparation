@@ -142,5 +142,39 @@ function logInfo(habit1, habit2) {
   );
 }
 
-const logUserInfo = logInfo.bind(user, "coding");
-logUserInfo("gyming");
+// const logUserInfo = logInfo.bind(user, "coding");
+// logUserInfo("gyming");
+
+// Ques  : Create a memoized function
+
+const memoized = (func) => {
+  const memObj = {};
+  return function (...args) {
+    if (args.length > func.length) {
+      console.log(func.length);
+      throw new Error("Argument is more than excepted.");
+    }
+    const argKey = JSON.stringify(args);
+    const isArgsExists = argKey in memObj;
+
+    if (isArgsExists) {
+      console.log("Answer from cache for key", argKey);
+      return memObj[argKey];
+    } else {
+      const ans = func.apply(this, args);
+      memObj[argKey] = ans;
+      console.log(ans);
+      return ans;
+    }
+  };
+};
+
+const addTwoNumber = (a, b, c) => {
+  if (!a) a = 0;
+  if (!b) b = 0;
+  if (!c) c = 0;
+  return a + b + c;
+};
+
+const memoizedAdd = memoized(addTwoNumber);
+memoizedAdd(1, 2, 3);
