@@ -143,6 +143,7 @@ function logInfo(habit1, habit2) {
 }
 
 // const logUserInfo = logInfo.bind(user, "coding");
+
 // logUserInfo("gyming");
 
 // Ques  : Create a memoized function
@@ -176,5 +177,54 @@ const addTwoNumber = (a, b, c) => {
   return a + b + c;
 };
 
-const memoizedAdd = memoized(addTwoNumber);
-memoizedAdd(1, 2, 3);
+// const memoizedAdd = memoized(addTwoNumber);
+// memoizedAdd(1, 2, 3);
+
+const memoFindFactorial = memoized((x) => {
+  {
+    if (x == 0 || x == 1) return 1;
+    return x * memoFindFactorial(x - 1);
+  }
+});
+
+// memoFindFactorial(5);
+
+// Ques2 : DOM Finder
+
+function getPathFromChild(parent, child) {
+  let currentElem = child;
+  const path = [];
+  while (currentElem !== parent) {
+    const parent = currentElem.parentElement;
+    const childArray = Array.from(parent.children);
+
+    path.push(childArray.indexOf(currentElem));
+
+    currentElem = parent;
+  }
+
+  return path;
+}
+
+function getValueFromPath(parent, path) {
+  let curElem = parent;
+  while (path.length) {
+    curElem = curElem.children[path.pop()];
+  }
+
+  return curElem.innerText;
+}
+
+function domFinder() {
+  const rootA = document.getElementById("rootA");
+  const nodeA = document.getElementById("nodeA");
+
+  const rootB = document.getElementById("rootB");
+
+  const path = getPathFromChild(rootA, nodeA);
+
+  const val = getValueFromPath(rootB, path);
+  console.log(val);
+}
+
+domFinder();
