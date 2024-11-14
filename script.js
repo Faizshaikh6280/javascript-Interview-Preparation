@@ -190,16 +190,13 @@ const memoFindFactorial = memoized((x) => {
 // memoFindFactorial(5);
 
 // Ques2 : DOM Finder
-
 function getPathFromChild(parent, child) {
   let currentElem = child;
   const path = [];
   while (currentElem !== parent) {
     const parent = currentElem.parentElement;
     const childArray = Array.from(parent.children);
-
     path.push(childArray.indexOf(currentElem));
-
     currentElem = parent;
   }
 
@@ -227,4 +224,126 @@ function domFinder() {
   console.log(val);
 }
 
-domFinder();
+// domFinder();
+
+// Ques3 : Flatten an array.
+// [[1,2,[3,8]],4,[5,6]];
+
+function flattenArray(arr) {
+  return arr.reduce((acc, cur) => {
+    if (Array.isArray(cur)) {
+      acc = acc.concat(flattenArray(cur));
+    } else {
+      acc.push(cur);
+    }
+    return acc;
+  }, []);
+}
+
+// console.log(flattenArray([[1, 2, [3, 8]], 4, [5, 6]]));
+
+// Ques : Flatten Deeply Nested Object
+
+const obj = {
+  A: "12",
+  B: 23,
+  C: {
+    P: 23,
+    O: {
+      L: 56,
+    },
+    Q: [1, 2],
+  },
+  F: {
+    A: {
+      I: {
+        Z: "Faiz",
+      },
+    },
+  },
+};
+
+const answer = {
+  A: "12",
+  B: "23",
+  "C.P": "23",
+  "C.O.L": "56",
+  "C.Q.0": 1,
+  "C.Q.1": "2",
+};
+
+function flattenDeeplyNestedObject(obj, prevKey) {
+  let ans = {};
+
+  const keys = Object.keys(obj);
+
+  for (let i = 0; i < keys.length; i++) {
+    const ansKey = prevKey ? prevKey + "." + keys[i] : keys[i];
+
+    if (Array.isArray(obj[keys[i]])) {
+      let arr = obj[keys[i]];
+      for (let j = 0; j < arr.length; j++) {
+        ans[ansKey + "." + j] = arr[j];
+      }
+    } else if (typeof obj[keys[i]] === "object") {
+      ans = {
+        ...ans,
+        ...flattenDeeplyNestedObject(obj[keys[i]], ansKey),
+      };
+    } else {
+      ans[ansKey] = obj[keys[i]];
+    }
+  }
+
+  return ans;
+}
+
+// const ansobj = flattenDeeplyNestedObject(obj, "");
+
+// Build Polyfill of Promise.all()
+
+function createPromise(id) {
+  const BASE_URL = "https://dummyjson.com/products/";
+  return fetch(`${BASE_URL}${id}`);
+}
+
+const tasks = [createPromise(50), createPromise(2), createPromise(3)];
+
+function myPromiseAll(tasks) {
+  const output = [];
+  return new Promise((res, rej) => {
+    tasks.forEach((promise, indx) => {
+      promise
+        .then((data) => {
+          output[indx] = data;
+          if (indx == tasks.length - 1) {
+            res(output);
+          }
+        })
+        .catch((err) => rej(err));
+    });
+  });
+}
+
+// myPromiseAll(tasks).then((data) => {
+//   console.log(data);
+// });
+
+// Ques : Create a polyfill of arr.spit(str,deliminator)
+
+// mySplit("This is my world"," ") -> ["this","is","my","world"];
+
+function mySplit(str, delimiter) {
+  if (delimiter === "") return Array.from(str);
+  const res = [];
+  let si = 0;
+  let ei = str.indexOf(delimiter);
+  while (ei != -1) {
+    res.push(str.slice(si, ei));
+    si = ei + delimiter.length;
+    ei = str.indexOf(delimiter, si);
+  }
+  const last = str.slice(si);
+  if (last) res.push(last);
+  return res;
+}
