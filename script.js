@@ -14,23 +14,14 @@
 //   return temp;
 // };
 
-// Array.prototype.myfilter = function (fn, context = this) {
-//   const temp = [];
-//   this = context;
-
-//   for (let i = 0; i < this.length; i++) {
-//     if (fn(this[i], i, this)) temp.push(this[i]);
-//   }
-//   return temp;
-// };
-
-// Array.prototype.myReduce = function (cb, initialVal) {
+// Array.prototype.myReduce = function (cb, initialVal,context) {
 //   let temp = initialVal;
 //   this = context;
 
 //   for (let i = 0; i < this.length; i++) {
 //     temp = cb(temp, this[i], i, this);
 //   }
+
 //   return temp;
 // };
 
@@ -122,6 +113,7 @@ Function.prototype.myBind = function (context, ...args) {
   if (typeof this !== "function") {
     throw new Error("this is not a function");
   }
+
   context.fn = this;
 
   return function (...newargs) {
@@ -343,7 +335,214 @@ function mySplit(str, delimiter) {
     si = ei + delimiter.length;
     ei = str.indexOf(delimiter, si);
   }
+
   const last = str.slice(si);
   if (last) res.push(last);
+
   return res;
 }
+
+// Ques : Task Schedules
+const Schedules = [
+  { id: "a", dependency: ["b", "c"] },
+  { id: "b", dependency: ["d"] },
+  { id: "c", dependency: ["e"] },
+  { id: "d", dependency: [] },
+  { id: "e", dependency: ["f"] },
+  { id: "f", dependency: [] },
+];
+
+function executeTask(tasks, taskname) {
+  // Build an adjacency list
+  const adjList = new Map();
+  for (const task of tasks) {
+    adjList.set(task.id, task.dependency);
+  }
+
+  const visited = new Set();
+  const visiting = new Set();
+
+  const result = [];
+
+  function dfs(task) {
+    if (visited.has(task)) return true; // Already processed
+    if (visiting.has(task)) return false; // Cycle detected
+
+    visiting.add(task); // Mark as being visited
+
+    for (const dep of adjList.get(task) || []) {
+      if (!dfs(dep)) return false; // Cycle detected
+    }
+
+    visiting.delete(task); // Remove from being visited
+    visited.add(task); // Mark as visited
+    result.push(task); // Add to result in topological order
+    return true;
+  }
+
+  if (!dfs(taskname)) {
+    console.log("Cycle exists");
+    return false;
+  }
+
+  console.log(result.join(" -> ")); // Reverse to get the correct order
+  return true;
+}
+
+// executeTask(Schedules, "a");
+
+Array.prototype.myReduce = function (cb, initialVal) {
+  if (!this.length) {
+    if (initialVal !== undefined) return initialVal;
+    throw Error("If array is empty , initial value must be provided");
+  }
+
+  let i = 0;
+  let ans = [];
+
+  if (typeof initialVal === "undefined") {
+    ans = this[0];
+    i++;
+  } else {
+    ans = initialVal;
+  }
+
+  for (; i < this.length; i++) {
+    ans = cb(ans, this[i], i, this);
+  }
+
+  return ans;
+};
+
+let arr = [1, 2, 3, 4, 5];
+
+// removed initial value from reduce (no 0)
+let result = [1, 2].myReduce((sum, cur) => sum + cur);
+// console.log(result);
+
+Array.prototype.myfilter = function (fn, context) {
+  const temp = [];
+
+  for (let i = 0; i < this.length; i++) {
+    if (fn.call(context, this[i], i, this)) temp.push(this[i]);
+  }
+
+  return temp;
+};
+
+function flattenEmployeeData(employee) {
+  // Your code here
+  const ans = [];
+  helper(employee, ans);
+  return ans;
+}
+
+function helper(employee, ans) {
+  const obj = {
+    id: employee.id,
+    name: employee.name,
+    position: employee.position,
+  };
+
+  ans.push(obj);
+
+  const dr = employee.directReports;
+
+  for (let i = 0; i < dr.length; i++) {
+    helper(dr[i], ans);
+  }
+}
+
+const employeeData = {
+  id: 1,
+  name: "John Doe",
+  position: "Manager",
+  directReports: [
+    {
+      id: 2,
+      name: "Jane Smith",
+      position: "Team Lead",
+      directReports: [
+        {
+          id: 3,
+          name: "Bob Johnson",
+          position: "Software Engineer",
+          directReports: [],
+        },
+        // ... other direct reports of Jane Smith
+      ],
+    },
+    {
+      id: 4,
+      name: "Alice Williams",
+      position: "Team Lead",
+      directReports: [
+        {
+          id: 5,
+          name: "Charlie Brown",
+          position: "UI/UX Designer",
+          directReports: [],
+        },
+        // ... other direct reports of Alice Williams
+      ],
+    },
+    // ... other direct reports of John Doe
+  ],
+};
+
+// Example Usage:
+const flatEmployeeData = flattenEmployeeData(employeeData);
+// console.log(flatEmployeeData);
+
+// Polyfill of Promises
+function PromisePolyfill(executor) {
+  let onResolve, onReject, isFullfilled, isCalled, value;
+
+  function resolve(val) {
+    isFullfilled = true;
+    value = val;
+    if (typeof onResolve === "function") {
+      onResolve(val);
+      isCalled = true;
+    }
+  }
+
+  function reject(err) {
+    isFullfilled = false;
+    value = err;
+    if (typeof onReject === "function") {
+      onReject(err);
+      isCalled = true;
+    }
+  }
+
+  this.then = function (cb) {
+    onResolve = cb;
+
+    if (isFullfilled && !isCalled) {
+      onResolve(value);
+      isCalled = true;
+    }
+
+    return this;
+  };
+
+  this.catch = function (cb) {
+    onReject = cb;
+    if (isFullfilled && !isCalled) {
+      onReject(value);
+      isCalled = true;
+    }
+    return this;
+  };
+
+  executor(resolve, reject);
+}
+
+const promiseObject = new PromisePolyfill((res, rej) => {
+  res("hello");
+});
+
+promiseObject
+  .then((data) => console.log(data))
+  .catch((err) => console.error(err));
