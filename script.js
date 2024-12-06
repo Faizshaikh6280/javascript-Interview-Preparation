@@ -543,6 +543,56 @@ const promiseObject = new PromisePolyfill((res, rej) => {
   res("hello");
 });
 
-promiseObject
-  .then((data) => console.log(data))
-  .catch((err) => console.error(err));
+const like = () => {
+  return new Promise((res, rej) => {
+    setTimeout(() => {
+      res("Like the Vedio");
+    }, 500);
+  });
+};
+
+const share = () => {
+  return new Promise((res, rej) => {
+    setTimeout(() => {
+      res("Share the Vedio");
+    }, 800);
+  });
+};
+
+const comment = () => {
+  return new Promise((res, rej) => {
+    setTimeout(() => {
+      res("Comment the Vedio");
+    }, 900);
+  });
+};
+
+const PromiseAllPolyFill = function (promises) {
+  return new Promise((resolve, reject) => {
+    const result = [];
+
+    if (!promises.length) {
+      resolve(result);
+      return;
+    }
+
+    let pending = promises.length;
+
+    promises.forEach((promise, idx) => {
+      Promise.resolve(promise).then((data) => {
+        result[idx] = data;
+        pending--;
+        if (pending === 0) resolve(result);
+      }, reject);
+    });
+  });
+};
+
+const results = PromiseAllPolyFill([like(), comment(), share()]);
+results.then((data) => console.log(data)).catch((err) => console.log(err));
+
+// promiseObject
+//   .then((data) => console.log(data))
+//   .catch((err) => console.error(err));
+
+// PollyFill Promise All
